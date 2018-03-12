@@ -3,7 +3,8 @@
 - name: Install Odoo dependencies
   apt:  pkg={{ item }}
         state=installed
-        update_cache=yes
+        update_cache={{ odoo_apt_update_cache }}
+        cache_valid_time={{ odoo_apt_cache_valid_time }}
   with_items: "{{ odoo_debian_packages }}"
   tags:
     - odoo_packages
@@ -14,14 +15,6 @@
   tags:
     - odoo_packages
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - odoo_config
-
-- name: Generate Odoo init script
-  template: src=odoo-{{ odoo_version }}.init dest=/etc/init.d/{{ odoo_service }}
-        owner=root group=root mode=0755
-        force={{ odoo_force_config and 'yes' or 'no' }}
-        backup=yes
-  when: odoo_init == True
-  notify: Restart Odoo
